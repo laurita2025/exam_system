@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado del Examen</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body{
+            background: linear-gradient(135deg, #1d4350, #a43931);
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+
+        .container{
+            background:white;
+            width:500px;
+            padding:40px;
+            border-radius:20px;
+            box-shadow:0px 10px 30px rgba(0,0,0,0.3);
+            text-align:center;
+        }
+
+        .icon{
+            font-size:60px;
+            margin-bottom:20px;
+        }
+
+        h1{
+            color:#2c3e50;
+            margin-bottom:20px;
+        }
+
+        .score{
+            font-size:50px;
+            font-weight:bold;
+            color:#3498db;
+            margin-bottom:20px;
+        }
+
+        .stats{
+            display:flex;
+            justify-content:space-around;
+            margin:20px 0;
+        }
+
+        .card{
+            background:#f8f9fa;
+            padding:20px;
+            border-radius:15px;
+            width:40%;
+            box-shadow:0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .correct{
+            color:#27ae60;
+        }
+
+        .incorrect{
+            color:#e74c3c;
+        }
+
+        .message{
+            margin-top:20px;
+            padding:15px;
+            border-radius:10px;
+            font-size:18px;
+            font-weight:bold;
+        }
+
+        .excellent{
+            background:#d4edda;
+            color:#155724;
+        }
+
+        .good{
+            background:#fff3cd;
+            color:#856404;
+        }
+
+        .bad{
+            background:#f8d7da;
+            color:#721c24;
+        }
+
+        .footer{
+            margin-top:20px;
+            color:#777;
+            font-size:14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="icon">🎓</div>
+
+    <h1>Examen Finalizado</h1>
+
+    <div class="score">
+        {{ score }}%
+    </div>
+
+    <div class="stats">
+        <div class="card">
+            <h2 class="correct">{{ correct }}</h2>
+            <p>Correctas</p>
+        </div>
+
+        <div class="card">
+            <h2 class="incorrect">{{ incorrect }}</h2>
+            <p>Incorrectas</p>
+        </div>
+    </div>
+
+    {% if score >= 80 %}
+        <div class="message excellent">
+            Excelente desempeño 🎉
+        </div>
+    {% elif score >= 60 %}
+        <div class="message good">
+            Buen trabajo 👍
+        </div>
+    {% else %}
+        <div class="message bad">
+            Necesitas mejorar 📚
+        </div>
+    {% endif %}
+
+    <div class="footer">
+        Gracias por realizar el examen
+    </div>
+
+</div>
+
+</body>
+</html>
