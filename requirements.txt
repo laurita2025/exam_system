@@ -2,3 +2,5 @@ flask
 pymongo
 flask-socketio
 eventlet
+gunicorn
+dnspython
