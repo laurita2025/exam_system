@@ -8,11 +8,11 @@ services:
     startCommand: gunicorn -k eventlet -w 1 app:app
     envVars:
       - key: MONGO_URI
-        value: "mongodb+srv://admin:Laura2026@cluster0.abcd123.mongodb.net/exam_system?retryWrites=true&w=majority"
+        value: ""
       - key: DB_NAME
         value: "exam_system"
       - key: SECRET_KEY
-        value: "supersecret"
+        value: ""
       - key: EXAM_TIME
         value: "1800"
       - key: MAX_WARNINGS

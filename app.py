@@ -9,9 +9,9 @@ from questions import questions
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='eventlet')
 
-client = MongoClient(MONGO_URI)
+client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client[DB_NAME]
 
 students = db.students
@@ -52,17 +52,28 @@ def login():
     session['exam_id'] = str(exam_id)
     return redirect('/exam')
 
+def get_exam():
+    exam_id = session.get('exam_id')
+    if not exam_id:
+        return None
+    try:
+        return exams.find_one({"_id": ObjectId(exam_id)})
+    except Exception:
+        return None
+
 @app.route('/exam')
 def exam():
-    exam = exams.find_one({"_id": ObjectId(session['exam_id'])})
+    exam = get_exam()
+    if not exam:
+        return redirect('/')
     return render_template('exam.html', exam=exam, time=EXAM_TIME)
 
 @app.route('/submit', methods=['POST'])
-
-@app.route('/submit', methods=['POST'])
 def submit():
-    exam = exams.find_one({"_id": ObjectId(session['exam_id'])})
-    answers = request.form
+    exam = get_exam()
+    if not exam:
+        return redirect('/')
+    answers = request.form.to_dict()
     score = 0
 
     for i, q in enumerate(exam['questions']):
@@ -70,13 +81,13 @@ def submit():
             score += 1
 
     correct = score
-    incorrect = 20 - score
-    final_score = (score / 20) * 100
+    incorrect = len(exam['questions']) - score
+    final_score = (score / len(exam['questions'])) * 100
 
     exams.update_one(
         {"_id": exam["_id"]},
         {"$set": {
-            "answers": answers.to_dict(),
+            "answers": answers,
             "score": final_score,
             "status": "finished"
         }}
@@ -91,8 +102,10 @@ def submit():
 
 @app.route('/warning', methods=['POST'])
 def warning():
-    exam = exams.find_one({"_id": ObjectId(session['exam_id'])})
-    warnings = exam['warnings'] + 1
+    exam = get_exam()
+    if not exam:
+        return jsonify({"error": "Exam not found"}), 404
+    warnings = exam.get('warnings', 0) + 1
 
     exams.update_one({"_id": exam["_id"]}, {"$set": {"warnings": warnings}})
 
