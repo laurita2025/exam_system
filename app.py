@@ -9,10 +9,10 @@ from questions import questions
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
-socketio = SocketIO(app, async_mode='eventlet')
+socketio = SocketIO(app, async_mode="threading")
 
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-db = client[DB_NAME]
+db = client["exam_system"]
 
 students = db.students
 exams = db.exams
