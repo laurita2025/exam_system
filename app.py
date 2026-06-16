@@ -120,4 +120,4 @@ def dashboard():
     return render_template("dashboard.html", exams=all_exams, db=db)
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000)

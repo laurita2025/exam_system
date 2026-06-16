@@ -4,3 +4,4 @@ flask-socketio
 eventlet
 gunicorn
 dnspython
+python-dotenv
