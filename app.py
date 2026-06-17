@@ -164,13 +164,14 @@ def warning():
             {
                 "$set": {
                     "status": "expelled",
-                    "finished_at": datetime.datetime.utcnow()
+                    "finished_at": datetime.datetime.utcnow(),
+                    "score": 0
                 }
             }
         )
-        return jsonify({"warnings": warnings, "expelled": True})
+        return jsonify({"warnings": warnings, "expelled": True, "maxWarnings": MAX_WARNINGS})
 
-    return jsonify({"warnings": warnings, "expelled": False})
+    return jsonify({"warnings": warnings, "expelled": False, "maxWarnings": MAX_WARNINGS})
 
 
 @app.route('/dashboard')
