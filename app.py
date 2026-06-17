@@ -88,6 +88,9 @@ def exam():
     if not exam:
         return redirect('/')
 
+    if exam.get("status") == "expelled":
+        return render_template("expelled.html")
+
     return render_template(
         "exam.html",
         exam=exam,
@@ -101,6 +104,14 @@ def submit():
 
     if not exam:
         return redirect('/')
+
+    if exam.get("status") == "expelled":
+        if not exam.get("finished_at"):
+            exams.update_one(
+                {"_id": exam["_id"]},
+                {"$set": {"finished_at": datetime.datetime.utcnow()}}
+            )
+        return render_template("expelled.html")
 
     answers = request.form.to_dict()
     score = 0
@@ -150,10 +161,16 @@ def warning():
     if warnings >= MAX_WARNINGS:
         exams.update_one(
             {"_id": exam["_id"]},
-            {"$set": {"status": "expelled"}}
+            {
+                "$set": {
+                    "status": "expelled",
+                    "finished_at": datetime.datetime.utcnow()
+                }
+            }
         )
+        return jsonify({"warnings": warnings, "expelled": True})
 
-    return jsonify({"warnings": warnings})
+    return jsonify({"warnings": warnings, "expelled": False})
 
 
 @app.route('/dashboard')
