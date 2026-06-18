@@ -159,7 +159,8 @@ def submit():
         "result.html",
         score=final_score,
         correct=correct,
-        incorrect=incorrect
+        incorrect=incorrect,
+        wrong_details=wrong_details
     )
 
 

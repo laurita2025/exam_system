@@ -137,6 +137,21 @@
         </div>
     {% endif %}
 
+    {% if wrong_details and wrong_details|length > 0 %}
+        <div class="incorrect-list">
+            <h2>Respuestas incorrectas</h2>
+            <ul>
+                {% for item in wrong_details %}
+                    <li>
+                        <strong>Pregunta {{ item.number }}:</strong> {{ item.question }}<br>
+                        <strong>Tu respuesta:</strong> {{ item.selected if item.selected else 'Sin respuesta' }}<br>
+                        <strong>Respuesta correcta:</strong> {{ item.correct }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     <div class="footer">
         Gracias por realizar el examen
     </div>
