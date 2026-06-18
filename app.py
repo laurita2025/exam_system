@@ -115,14 +115,30 @@ def submit():
 
     answers = request.form.to_dict()
     score = 0
+    wrong_details = []
 
     for i, q in enumerate(exam["questions"]):
-        if answers.get(str(i)) == q["answer"]:
+        submitted = answers.get(str(i))
+        if submitted == q["answer"]:
             score += 1
+        else:
+            wrong_details.append({
+                "number": i + 1,
+                "question": q["question"],
+                "selected": submitted,
+                "correct": q["answer"]
+            })
 
     correct = score
-    incorrect = len(exam["questions"]) - score
+    incorrect = len(wrong_details)
     final_score = (score / len(exam["questions"])) * 100
+
+    if final_score >= 80:
+        dashboard_message = "Excelente desempeño 🎉"
+    elif final_score >= 60:
+        dashboard_message = "Buen trabajo 👍"
+    else:
+        dashboard_message = "Necesitas mejorar 📚"
 
     exams.update_one(
         {"_id": exam["_id"]},
@@ -131,7 +147,10 @@ def submit():
                 "answers": answers,
                 "score": final_score,
                 "status": "finished",
-                "finished_at": datetime.datetime.utcnow()
+                "finished_at": datetime.datetime.utcnow(),
+                "incorrect_count": incorrect,
+                "wrong_details": wrong_details,
+                "dashboard_message": dashboard_message
             }
         }
     )
@@ -176,11 +195,48 @@ def warning():
 
 @app.route('/dashboard')
 def dashboard():
-    all_exams = list(exams.find())
+    all_exams = []
+    for exam in exams.find():
+        student = students.find_one({"_id": exam["student_id"]})
+        incorrect_count = exam.get("incorrect_count", 0)
+        wrong_details = exam.get("wrong_details", [])
+
+        if exam.get("status") == "finished" and not wrong_details and exam.get("answers"):
+            for i, q in enumerate(exam["questions"]):
+                submitted = exam["answers"].get(str(i))
+                if submitted != q["answer"]:
+                    incorrect_count += 1
+                    wrong_details.append({
+                        "number": i + 1,
+                        "question": q["question"],
+                        "selected": submitted,
+                        "correct": q["answer"]
+                    })
+
+        dashboard_message = exam.get("dashboard_message")
+        if not dashboard_message:
+            if exam.get("status") == "finished":
+                score_value = exam.get("score", 0)
+                if score_value >= 80:
+                    dashboard_message = "Excelente desempeño 🎉"
+                elif score_value >= 60:
+                    dashboard_message = "Buen trabajo 👍"
+                else:
+                    dashboard_message = "Necesitas mejorar 📚"
+            elif exam.get("status") == "active":
+                dashboard_message = "En curso"
+            else:
+                dashboard_message = "Expulsado"
+
+        exam["student"] = student
+        exam["incorrect_count"] = incorrect_count
+        exam["wrong_details"] = wrong_details
+        exam["dashboard_message"] = dashboard_message
+        all_exams.append(exam)
+
     return render_template(
         "dashboard.html",
-        exams=all_exams,
-        db=db
+        exams=all_exams
     )
 
 

@@ -163,17 +163,16 @@
             <th>Nombre</th>
             <th>Carnet</th>
             <th>Estado</th>
+            <th>Incorrectas</th>
             <th>Advertencias</th>
             <th>Nota</th>
+            <th>Mensaje</th>
         </tr>
 
         {% for exam in exams %}
-        <tr>
-            <td>
-                {% set student = db.students.find_one({'_id': exam.student_id}) %}
-                {{ student.name }}
-            </td>
-            <td>{{ student.carnet }}</td>
+        <tr onclick='showIncorrectAnswers({{ exam.student.name|tojson }}, {{ exam.status|tojson }}, {{ exam.wrong_details|tojson }})' style="cursor:pointer">
+            <td>{{ exam.student.name }}</td>
+            <td>{{ exam.student.carnet }}</td>
 
             <td class="
                 {% if exam.status == 'active' %}active{% endif %}
@@ -183,13 +182,35 @@
                 {{ exam.status }}
             </td>
 
+            <td>{{ exam.incorrect_count }}</td>
             <td class="warning">{{ exam.warnings }}</td>
-            <td class="score">{{ exam.score }}</td>
+            <td class="score">{{ exam.score }}%</td>
+            <td>{{ exam.dashboard_message }}</td>
         </tr>
         {% endfor %}
     </table>
 
 </div>
+
+<script>
+    function showIncorrectAnswers(name, status, wrongDetails) {
+        let message = `Estudiante: ${name}\nEstado: ${status}`;
+
+        if (status !== 'finished' || !wrongDetails || wrongDetails.length === 0) {
+            message += '\nNo hay respuestas incorrectas registradas.';
+        } else {
+            message += `\nIncorrectas: ${wrongDetails.length}\n`;
+            wrongDetails.forEach(function(item) {
+                let selected = item.selected || 'Sin respuesta';
+                message += `\nPregunta ${item.number}: ${item.question}`;
+                message += `\nTu respuesta: ${selected}`;
+                message += `\nRespuesta correcta: ${item.correct}\n`;
+            });
+        }
+
+        alert(message);
+    }
+</script>
 
 </body>
 </html>
